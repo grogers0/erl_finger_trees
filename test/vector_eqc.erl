@@ -127,6 +127,22 @@ prop_concat(G) ->
         mconcat(model(eval(V1)), model(eval(V2))) ==
         model(vector:concat(eval(V1), eval(V2)))).
 
+prop_concat2() -> prop_concat2(int()).
+prop_concat2(G) ->
+    ?FORALL({L1, L2}, {long_list(G), long_list(G)},
+        begin
+            V1 = lists:foldl(fun vector:pushr/2, vector:new(), L1),
+            V2 = lists:foldr(fun vector:pushl/2, vector:new(), L2),
+            V12 = vector:concat(V1, V2),
+            L12 = L1 ++ L2,
+            L12 == model(V12) andalso
+                vector:size(V12) == vector:size(V1) + vector:size(V2) andalso
+                vector:size(V12) == length(L12)
+        end).
+
+long_list(G) ->
+    ?SIZED(Size, resize(Size * 5, list(G))).
+
 prop_size() -> prop_size(int()).
 prop_size(G) ->
     ?FORALL(V, vec(G),
